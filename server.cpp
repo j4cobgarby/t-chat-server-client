@@ -1,6 +1,7 @@
 #include <SFML/Network.hpp>
 #include <iostream>
 #include <list>
+#include <map>
 #include <string>
 #include <fstream>
 
@@ -17,6 +18,7 @@ int main() {
     std::cout << "Listening for clients...\n";
 
     std::list<sf::TcpSocket*> clients;
+    std::map<sf::TcpSocket*, std::string> client2name;
     sf::SocketSelector selector;
 
     selector.add(listener);
@@ -56,6 +58,8 @@ int main() {
                                 std::string name, body;
                                 std::string type = "MSG";
                                 packet >> type >> name >> body;
+
+                                client2name[&client] = name;
                                 std::cout << bold_on << name << ": " << bold_off << body << std::endl;
 
                                 for (std::list<sf::TcpSocket*>::iterator it2 = clients.begin(); it2 != clients.end(); ++it2) {
@@ -66,13 +70,14 @@ int main() {
                             break;
                         case sf::Socket::Disconnected:
                             {
-                                std::string displayname = client.getRemoteAddress().toString();
+                                std::string displayname = client2name.at(&client);
                                 std::cout << bold_on << "** " << bold_off << 
                                     client.getRemoteAddress().toString() << " disconnected.\n";
                                 selector.remove(client);
                                 client.disconnect();
                                 delete(&client);
                                 clients.erase(it);
+                                client2name.erase(&client);
                                 it--;
                                 std::cout << bold_on << "** " << bold_off << "Removed that client.\n";
 
