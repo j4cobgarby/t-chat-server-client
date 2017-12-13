@@ -19,7 +19,7 @@ void display_incoming(bool* running, sf::TcpSocket* server, std::string* filter_
                 std::cout << bold_on << name << ": " << bold_off << body << std::endl;
             }
             if (type == "DISCON") {
-                std::cout << bold_on << "** " << name << " left the server!" << bold_off << std::endl;
+                std::cout << bold_on << "** " << name << bold_off << " left the server!" << std::endl;
             }
         }
     }
