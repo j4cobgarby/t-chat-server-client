@@ -46,7 +46,6 @@ int main() {
                     delete new_client;
                 }
             } else {
-                // first remove any disconnected clients
                 for (std::list<sf::TcpSocket*>::iterator it = clients.begin(); it != clients.end(); ++it) {
                     sf::TcpSocket& client = **it;
                     if (selector.isReady(client)) {
