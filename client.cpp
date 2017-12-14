@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include <cstdlib> // stoa
+#include <cstdlib> // stoa, atoi
 
 #include "constants.hpp"
 
@@ -25,22 +25,49 @@ void display_incoming(bool* running, sf::TcpSocket* server, std::string* filter_
     }
 }
 
-int main() {
-    sf::TcpSocket socket;
-
-    std::string ip;
-    std::cout << "Type the ip of a server, or leave blank for localhost: ";
-    std::getline(std::cin, ip);
-    if (ip == "") {
-        std::cout << bold_on << "** " << bold_off << 
-            "No ip specified, connecting to localhost by default.\n";
-        ip = "127.0.0.1";
+int main(int argc, char* argv[]) {
+    bool host_set = false, name_set = false;
+    std::string ip, name;
+    int port = NET_PORT_DEFAULT;
+    if (argc > 1) { // some command line arguments, but not --help
+        for (int i = 0; i < argc; i++) {
+            std::string flag(argv[i]);
+            if (flag == "-?" || flag == "--help") {
+                std::cout << 
+                    "Starts a client to join a server using this protocol." << std::endl << std::endl <<
+                    "  -?, --help\tShows this help." << std::endl;
+                return EXIT_SUCCESS;
+            }
+            if (i != argc-1) { // if not the last argument
+                if (flag == "-h" || flag == "--host") {
+                    ip = argv[i+1];
+                    host_set = true;
+                } else if (flag == "-p" || flag == "--port") {
+                    port = atoi(argv[i+1]);
+                } else if (flag == "-n" || flag == "--name") {
+                    name = argv[i+1];
+                    name_set = true;
+                }
+            }
+        }
     }
 
-    sf::Socket::Status status = socket.connect(ip, NET_PORT);
+    sf::TcpSocket socket;
+
+    if (!host_set) {
+        std::cout << "Type the ip of a server, or leave blank for localhost: ";
+        std::getline(std::cin, ip);
+        if (ip == "") {
+            std::cout << bold_on << "** " << bold_off << 
+                "No ip specified, connecting to localhost by default.\n";
+            ip = "127.0.0.1";
+        }
+    }
+
+    sf::Socket::Status status = socket.connect(ip, port);
 
     if (status != sf::Socket::Done) {
-        std::cout << "Error! Could not connect!" << std::endl;
+        std::cout << "Could not connect!" << std::endl;
         return EXIT_FAILURE;
     } else {
         std::cout << bold_on << "** " << bold_off << 
@@ -57,19 +84,24 @@ int main() {
         std::cout << serv_info << std::endl;
     }
 
-    std::string name;
-    std::cout << "What's your name? ";
-    std::getline(std::cin, name);
+    if (!name_set) {
+        std::cout << "What's your name? ";
+        std::getline(std::cin, name);
+    }
 
     std::thread display_thread(display_incoming, &running, &socket, &name);
 
-    std::cout << "Now you can " << bold_on << "type messages " << bold_off << "to send them to everyone else on the server!" << std::endl;
+    std::cout << "Now you can " << bold_on << "type messages " << bold_off << "to send them to everyone else on the server!" << std::endl <<
+        std::string(10, '_') << std::endl << std::endl;
 
     while (true) {
         std::string out;
 
         std::getline(std::cin, out);
-        if (out == "") continue;
+        if (out == "") {
+            std::cout << "\033[F";
+            continue;
+        }
 
         sf::Packet packet;
         packet << std::string("MSG") << name << out;

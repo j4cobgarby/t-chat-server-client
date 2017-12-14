@@ -7,13 +7,47 @@
 
 #include "constants.hpp"
 
-int main() {
-    std::cout << bold_on << "Type an MOTD" << bold_off << " (message of the day,) to be displayed to any visitors: ";
+int main(int argc, char* argv[]) {
     std::string motd;
-    std::getline(std::cin, motd);
+    int port = NET_PORT_DEFAULT;
+    bool motd_set = false;
+    if (argc > 1) { // some command line arguments, but not --help
+        for (int i = 0; i < argc; i++) {
+            std::string flag(argv[i]);
+            if (flag == "-?" || flag == "--help") {
+                std::cout << 
+                    "Hosts a server for the simple chat server/client protocol." << std::endl << std::endl <<
+                    "  -?, --help\tShows this help." << std::endl << std::endl <<
+                    "  -m, --motd\tFollow this flag by the desired motd." << std::endl <<
+                    "\t\tIf there's an motd.txt in the directory of the executable, this has no" << std::endl <<
+                    "\t\t\teffect, and the motd is instead set to the contents of that file." << std::endl <<
+                    "\t\tIf neither this flag nor the file motd.txt is present, the program will" << std::endl <<
+                    "\t\t\task you to enter the desired motd before starting the server." << std::endl;
+                return EXIT_SUCCESS;
+            }
+            if (i != argc-1) { // if not the last argument
+                if (flag == "-p" || flag == "--port") {
+                    port = atoi(argv[i+1]);
+                } else if (flag == "-m" || flag == "--motd") {
+                    motd = argv[i+1];
+                    motd_set = true;
+                }
+            }
+        }
+    }
+
+    if (!motd_set) {
+        if (file_exists("motd.txt")) {
+            std::ifstream motdfile("motd.txt");
+            motd = std::string((std::istreambuf_iterator<char>(motdfile)), std::istreambuf_iterator<char>());
+        } else {
+            std::cout << bold_on << "Type an MOTD" << bold_off << " (message of the day,) to be displayed to any visitors: ";
+            std::getline(std::cin, motd);
+        }
+    }
 
     sf::TcpListener listener;
-    listener.listen(NET_PORT);
+    listener.listen(port);
 
     std::cout << "Listening for clients...\n";
 
@@ -31,6 +65,7 @@ int main() {
                 sf::TcpSocket* new_client = new sf::TcpSocket;
                 if (listener.accept(*new_client) == sf::Socket::Done) {
                     clients.push_back(new_client);
+                    client2name[new_client] = new_client->getRemoteAddress().toString();
                     selector.add(*new_client);
                     std::cout << bold_on << "** " << bold_off << new_client->getRemoteAddress().toString() << " connected." << std::endl;
                     std::cout << "There are now " << clients.size() << " client(s) connected." << std::endl;
@@ -69,20 +104,20 @@ int main() {
                             break;
                         case sf::Socket::Disconnected:
                             {
-                                std::string displayname = client2name.at(&client);
+                                std::string displayname = "test";
+                                displayname = client2name.at(&client);
+            
                                 std::cout << bold_on << "** " << bold_off << 
-                                    client.getRemoteAddress().toString() << " disconnected.\n";
+                                    displayname << " disconnected.\n";
                                 selector.remove(client);
                                 client.disconnect();
                                 delete(&client);
                                 clients.erase(it);
                                 client2name.erase(&client);
                                 it--;
-                                std::cout << bold_on << "** " << bold_off << "Removed that client.\n";
 
                                 sf::Packet discon_packet;
                                 discon_packet << std::string("DISCON") << displayname << std::string("Left the server.");
-
                                 for (std::list<sf::TcpSocket*>::iterator it2 = clients.begin(); it2 != clients.end(); ++it2) {
                                     sf::TcpSocket& client2send = **it2;
                                     client2send.send(discon_packet);
