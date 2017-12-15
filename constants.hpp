@@ -15,4 +15,11 @@ inline bool file_exists(const std::string& name) {
     return f.good();
 }
 
+inline void send_packet(const std::string type, const std::string name, 
+        const std::string body, sf::TcpSocket* socket) {
+    sf::Packet pack;
+    pack << type << name << body;
+    socket->send(pack);
+}
+
 #endif

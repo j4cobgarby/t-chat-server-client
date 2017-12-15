@@ -80,10 +80,10 @@ int main(int argc, char* argv[]) {
     // expect an motd
     sf::Packet motd_packet;
     if (socket.receive(motd_packet) == sf::Socket::Done) {
-        std::string motd, serv_info;
-        motd_packet >> motd >> serv_info;
+        std::string type, motd, serv_info;
+        motd_packet >> type >> motd >> serv_info;
         std::cout << "Server MOTD:\n\n";
-        std::cout << bold_on << motd << bold_off << std::endl << std::endl;
+        std::cout << motd << std::endl << std::endl;
         std::cout << serv_info << std::endl;
     }
 
@@ -106,9 +106,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-        sf::Packet packet;
-        packet << std::string("MSG") << name << out;
-        socket.send(packet);
+        send_packet("MSG", name, out, &socket);
     }
 
     running = false;

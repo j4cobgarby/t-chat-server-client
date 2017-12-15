@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
                     "Hosts a server for the simple chat server/client protocol." << std::endl << std::endl <<
                     "  -?, --help\tShows this help." << std::endl << std::endl <<
                     "  -m, --motd\tFollow this flag by the desired motd." << std::endl <<
-                    "\t\tAlternatively, you can create an motd.txt in the executable directory." << std::endl << std::endl <<
+                    "\t\tAlternatively, you can create a file at the path /etc/tserver/motd.txt." << std::endl << std::endl <<
                     "  -p, --port\tSets the port for the server to run on." << std::endl;
                 return EXIT_SUCCESS;
             }
@@ -35,8 +35,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (!motd_set) {
-        if (file_exists("motd.txt")) {
-            std::ifstream motdfile("motd.txt");
+        if (file_exists("/etc/tserver/motd.txt")) {
+            std::ifstream motdfile("/etc/tserver/motd.txt");
             motd = std::string((std::istreambuf_iterator<char>(motdfile)), std::istreambuf_iterator<char>());
         } else {
             std::cout << bold_on << "Type an MOTD" << bold_off << " (message of the day,) to be displayed to any visitors: ";
@@ -71,9 +71,7 @@ int main(int argc, char* argv[]) {
                     std::string server_info;
                     server_info += std::to_string(clients.size()-1) + " user(s) connected, excluding yourself:\n";
 
-                    sf::Packet motd_packet;
-                    motd_packet << motd << server_info;
-                    new_client->send(motd_packet);
+                    send_packet("MOTD", motd, server_info, new_client);
                 } else {
                     std::cout << "A client tried to join but didn't quite manage.\n";
                     delete new_client;
@@ -114,11 +112,9 @@ int main(int argc, char* argv[]) {
                                 client2name.erase(&client);
                                 it--;
 
-                                sf::Packet discon_packet;
-                                discon_packet << std::string("DISCON") << displayname << std::string("Left the server.");
                                 for (std::list<sf::TcpSocket*>::iterator it2 = clients.begin(); it2 != clients.end(); ++it2) {
                                     sf::TcpSocket& client2send = **it2;
-                                    client2send.send(discon_packet);
+                                    send_packet("DISCON", displayname, "Left the server", &client2send);
                                 }
                             }
                             break;
