@@ -104,11 +104,11 @@ int main(int argc, char* argv[]) {
                             break;
                         case sf::Socket::Disconnected:
                             {
-                                std::string displayname = "test";
+                                std::string displayname;
                                 displayname = client2name.at(&client);
             
                                 std::cout << bold_on << "** " << bold_off << 
-                                    displayname << " disconnected.\n";
+                                    displayname << " disconnected." << std::endl;
                                 selector.remove(client);
                                 client.disconnect();
                                 delete(&client);
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
 
                                 for (std::list<sf::TcpSocket*>::iterator it2 = clients.begin(); it2 != clients.end(); ++it2) {
                                     sf::TcpSocket& client2send = **it2;
-                                    send_packet("DISCON", displayname, "Left the server", &client2send);
+                                    send_packet("DISCON", displayname, "Disconnected.", &client2send);
                                 }
                             }
                             break;
