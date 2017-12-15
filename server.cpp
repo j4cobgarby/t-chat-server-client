@@ -19,7 +19,8 @@ int main(int argc, char* argv[]) {
                     "Hosts a server for the simple chat server/client protocol." << std::endl << std::endl <<
                     "  -?, --help\tShows this help." << std::endl << std::endl <<
                     "  -m, --motd\tFollow this flag by the desired motd." << std::endl <<
-                    "\t\tAlternatively, you can create an motd.txt in the executable directory." << std::endl;
+                    "\t\tAlternatively, you can create an motd.txt in the executable directory." << std::endl << std::endl <<
+                    "  -p, --port\tSets the port for the server to run on." << std::endl;
                 return EXIT_SUCCESS;
             }
             if (i != argc-1) { // if not the last argument
