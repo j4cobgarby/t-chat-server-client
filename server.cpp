@@ -19,10 +19,7 @@ int main(int argc, char* argv[]) {
                     "Hosts a server for the simple chat server/client protocol." << std::endl << std::endl <<
                     "  -?, --help\tShows this help." << std::endl << std::endl <<
                     "  -m, --motd\tFollow this flag by the desired motd." << std::endl <<
-                    "\t\tIf there's an motd.txt in the directory of the executable, this has no" << std::endl <<
-                    "\t\t\teffect, and the motd is instead set to the contents of that file." << std::endl <<
-                    "\t\tIf neither this flag nor the file motd.txt is present, the program will" << std::endl <<
-                    "\t\t\task you to enter the desired motd before starting the server." << std::endl;
+                    "\t\tAlternatively, you can create an motd.txt in the executable directory." << std::endl;
                 return EXIT_SUCCESS;
             }
             if (i != argc-1) { // if not the last argument

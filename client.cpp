@@ -35,7 +35,10 @@ int main(int argc, char* argv[]) {
             if (flag == "-?" || flag == "--help") {
                 std::cout << 
                     "Starts a client to join a server using this protocol." << std::endl << std::endl <<
-                    "  -?, --help\tShows this help." << std::endl;
+                    "  -?, --help\tShows this help." << std::endl << std::endl <<
+                    "  -h, --host\tSets the ip of the host to connect to." << std::endl << std::endl <<
+                    "  -p, --port\tSets the port of the server to connect to." << std::endl << std::endl <<
+                    "  -n, --name\tSets your name, so that the program doesn't ask you when you join." << std::endl;
                 return EXIT_SUCCESS;
             }
             if (i != argc-1) { // if not the last argument
