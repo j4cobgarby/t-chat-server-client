@@ -1,6 +1,9 @@
 # t
 ## A very simple chat client and server
 
+### Why's it called *t*?
+Because *talk* begins with *t*.
+
 ### Features
  - Hosting a server on a port of your choice.
  - Server motd.
