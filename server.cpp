@@ -85,16 +85,20 @@ int main(int argc, char* argv[]) {
                         switch (client.receive(packet)) {
                         case sf::Socket::Done:
                             {
-                                std::string name, body;
-                                std::string type = "MSG";
+                                std::string type, name, body;
                                 packet >> type >> name >> body;
 
-                                client2name[&client] = name;
-                                std::cout << bold_on << name << ": " << bold_off << body << std::endl;
+                                if (type == "MSG") {
+                                    client2name[&client] = name;
+                                    std::cout << bold_on << name << ": " << bold_off << body << std::endl;
 
-                                for (std::list<sf::TcpSocket*>::iterator it2 = clients.begin(); it2 != clients.end(); ++it2) {
-                                    sf::TcpSocket& client2send = **it2;
-                                    client2send.send(packet);
+                                    for (std::list<sf::TcpSocket*>::iterator it2 = clients.begin(); it2 != clients.end(); ++it2) {
+                                        sf::TcpSocket& client2send = **it2;
+                                        client2send.send(packet);
+                                    }
+                                } else if (type == "NAME") {
+                                    std::cout << client2name.at(&client) << " (" << client.getRemoteAddress() << ") changed their name to " << name << std::endl;
+                                    client2name[&client] = name;
                                 }
                             }
                             break;

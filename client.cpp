@@ -92,6 +92,8 @@ int main(int argc, char* argv[]) {
         std::getline(std::cin, name);
     }
 
+    send_packet("NAME", name, "Set by user", &socket);
+
     std::thread display_thread(display_incoming, &running, &socket, &name);
 
     std::cout << "Now you can " << bold_on << "type messages " << bold_off << "to send them to everyone else on the server!" << std::endl <<
